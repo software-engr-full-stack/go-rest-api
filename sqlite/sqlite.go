@@ -63,14 +63,15 @@ func (db *DB) Open() (err error) {
 
 	// Make the parent directory unless using an in-memory db.
 	if db.DSN != ":memory:" {
-		if err := os.MkdirAll(filepath.Dir(db.DSN), 0700); err != nil {
-			return err
+		const perm = 0700
+		if err = os.MkdirAll(filepath.Dir(db.DSN), perm); err != nil {
+			return
 		}
 	}
 
 	// Connect to the database.
 	if db.db, err = sql.Open("sqlite3", db.DSN); err != nil {
-		return err
+		return
 	}
 
 	// Enable WAL. SQLite performs better with the WAL  because it allows
@@ -130,12 +131,13 @@ func (db *DB) migrate() error {
 
 // migrate runs a single migration file within a transaction. On success, the
 // migration file name is saved to the "migrations" table to prevent re-running.
-func (db *DB) migrateFile(name string) error {
+func (db *DB) migrateFile(name string) (defErr error) {
 	tx, err := db.db.Begin()
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	// TODO: lint
+	defer tx.Rollback() //nolint:golangcilint,errcheck
 
 	// Ensure migration has not already been run.
 	var n int
@@ -191,7 +193,8 @@ func (db *DB) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 
 // monitor runs in a goroutine and periodically calculates internal stats.
 func (db *DB) monitor() {
-	ticker := time.NewTicker(10 * time.Second)
+	const delaySeconds = 10
+	ticker := time.NewTicker(delaySeconds * time.Second)
 	defer ticker.Stop()
 
 	for {
@@ -213,7 +216,8 @@ func (db *DB) updateStats(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	// TODO: lint
+	defer tx.Rollback() //nolint:golangcilint,errcheck
 
 	var n int
 	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM users;`).Scan(&n); err != nil {
@@ -281,11 +285,4 @@ func FormatError(err error) error {
 	default:
 		return err
 	}
-}
-
-// logstr is a helper function for printing and returning a string.
-// It can be useful for printing out query text.
-func logstr(s string) string {
-	println(s)
-	return s
 }
