@@ -4,7 +4,9 @@ go 1.18
 
 require (
 	github.com/mattn/go-sqlite3 v1.14.12
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.12.1
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
