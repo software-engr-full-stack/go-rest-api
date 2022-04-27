@@ -11,7 +11,6 @@ import (
     "path/filepath"
 
 	"go-rest-api/app"
-	"go-rest-api/config"
 )
 
 // main is the entry point into our application. However, it provides poor
@@ -59,20 +58,22 @@ func Run(ctx context.Context, args []string) error {
 		os.Exit(1)
 	}
 
-	configFullPath, err := filepath.Abs(configFileName)
+	configFileFullPath, err := filepath.Abs(configFileName)
+	if err != nil {
+		return err
+	}
+
+	cfg, err := app.NewConfig(configFileFullPath)
 	if err != nil {
 		return err
 	}
 
 	// Delegate subcommands to their own Run() methods.
 	switch cmd {
-	case "test":
-		println("... test")
-		cfg, err := config.New(configFullPath)
-		if err != nil {
+	case "db-setup":
+		if err := dbSetup(cfg); err != nil {
 			return err
 		}
-		fmt.Printf("... %#v\n", cfg)
 
 		return nil
 	case "", "-h", "help":
@@ -90,10 +91,10 @@ Command line utility for interacting with the WTF Dial service.
 
 Usage:
 
-	appctl <command> [arguments]
+	appctl <command> --config config-file [args]
 
 The commands are:
 
-	test        ...
+	db-setup	setup the database
 `[1:])
 }
