@@ -4,6 +4,7 @@ import (
     "os"
     "strings"
     "fmt"
+    "path/filepath"
 
     "github.com/pkg/errors"
     yaml "gopkg.in/yaml.v2"
@@ -31,6 +32,8 @@ type ConfigType struct {
     IsTest        bool
     IsProduction  bool
     Env           string
+
+    AppDir        string
 
     Database      ConfigDatabaseType
 }
@@ -77,6 +80,8 @@ func NewConfig(configFileName string) (ConfigType, error) {
     } else {
         cfg.Database = db
     }
+
+    cfg.AppDir = filepath.Join(filepath.Dir(configFileName), "..")
 
     return cfg, nil
 }
