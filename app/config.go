@@ -1,4 +1,4 @@
-package config
+package app
 
 import (
     "os"
@@ -9,7 +9,7 @@ import (
     yaml "gopkg.in/yaml.v2"
 )
 
-type DatabaseType struct {
+type ConfigDatabaseType struct {
     Host         string `yaml:"host"`
     Name         string `yaml:"name"`
     Adapter      string `yaml:"adapter"`
@@ -23,16 +23,16 @@ type DatabaseType struct {
 }
 
 type unmarshalType struct {
-    Database     map[string]DatabaseType `yaml:"database"`
+    Database     map[string]ConfigDatabaseType `yaml:"database"`
 }
 
-type Type struct {
+type ConfigType struct {
     IsDevelopment bool
     IsTest        bool
     IsProduction  bool
     Env           string
 
-    Database      DatabaseType
+    Database      ConfigDatabaseType
 }
 
 const (
@@ -41,10 +41,10 @@ const (
     PRODUCTION  = "production"
 )
 
-func New(configFileName string) (Type, error) {
-    var empty Type
+func NewConfig(configFileName string) (ConfigType, error) {
+    var empty ConfigType
 
-    var cfg Type
+    var cfg ConfigType
     env := strings.TrimSpace(os.Getenv("GO_ENV"))
     switch env {
     case DEVELOPMENT, "":
