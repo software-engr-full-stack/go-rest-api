@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"go-rest-api/sqlite"
+	"go-rest-api/lib"
 )
 
 // Ensure the test database can open & close.
@@ -16,14 +17,18 @@ func TestDB(t *testing.T) {
 func MustOpenDB(tb testing.TB) *sqlite.DB {
 	tb.Helper()
 
+	cfg, err := lib.TestConfig()
+	if err != nil {
+		tb.Fatal(err)
+	}
+
 	// Write to an in-memory database by default.
 	// If the -dump flag is set, generate a temp file for the database.
-	dsn := ":memory:"
-
-	db := sqlite.NewDB(dsn)
+	db := sqlite.NewDB(cfg.Database)
 	if err := db.Open(); err != nil {
 		tb.Fatal(err)
 	}
+
 	return db
 }
 

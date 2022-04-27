@@ -45,9 +45,10 @@ type DB struct {
 }
 
 // NewDB returns a new instance of DB associated with the given datasource name.
-func NewDB(dsn string) *DB {
+// func NewDB(dsn string) *DB {
+func NewDB(dbcfg app.ConfigDatabaseType) *DB {
 	db := &DB{
-		DSN: dsn,
+		DSN: dbcfg.Name,
 		Now: time.Now,
 	}
 	db.ctx, db.cancel = context.WithCancel(context.Background())
