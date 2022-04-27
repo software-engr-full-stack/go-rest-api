@@ -1,0 +1,25 @@
+# secrets/config.yml
+database:
+  default: &default
+    adapter: sqlite3
+    pool: 5
+    timeout: 5000
+
+  development:
+    <<: *default
+    name: db/development.sqlite3
+
+  test:
+    <<: *default
+    name: ':memory:'
+    # name: db/test.sqlite3
+
+  production:
+    <<: *default
+    adapter: postgres
+    name: go_rest_api
+    max_open_conns: 1000
+    user: 'user'
+    password: 'password'
+    port: 5432
+    host: database.example.com
