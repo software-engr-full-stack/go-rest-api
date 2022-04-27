@@ -39,6 +39,8 @@ type DB struct {
 	// Datasource name.
 	DSN string
 
+	AppDir string
+
 	// Returns the current time. Defaults to time.Now().
 	// Can be mocked for tests.
 	Now func() time.Time
@@ -46,9 +48,10 @@ type DB struct {
 
 // NewDB returns a new instance of DB associated with the given datasource name.
 // func NewDB(dsn string) *DB {
-func NewDB(dbcfg app.ConfigDatabaseType) *DB {
+func NewDB(cfg app.ConfigType) *DB {
 	db := &DB{
-		DSN: dbcfg.Name,
+		DSN: cfg.Database.Name,
+		AppDir: cfg.AppDir,
 		Now: time.Now,
 	}
 	db.ctx, db.cancel = context.WithCancel(context.Background())
@@ -62,16 +65,22 @@ func (db *DB) Open() (err error) {
 		return fmt.Errorf("dsn required")
 	}
 
+	mem := ":memory:"
+	var dsn string
 	// Make the parent directory unless using an in-memory db.
-	if db.DSN != ":memory:" {
+	if db.DSN != mem {
 		const perm = 0700
-		if err = os.MkdirAll(filepath.Dir(db.DSN), perm); err != nil {
+		dsn = filepath.Join(db.AppDir, db.DSN)
+
+		if err = os.MkdirAll(filepath.Dir(dsn), perm); err != nil {
 			return
 		}
+	} else {
+		dsn = db.DSN
 	}
 
 	// Connect to the database.
-	if db.db, err = sql.Open("sqlite3", db.DSN); err != nil {
+	if db.db, err = sql.Open("sqlite3", dsn); err != nil {
 		return
 	}
 

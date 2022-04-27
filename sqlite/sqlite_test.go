@@ -24,7 +24,7 @@ func MustOpenDB(tb testing.TB) *sqlite.DB {
 
 	// Write to an in-memory database by default.
 	// If the -dump flag is set, generate a temp file for the database.
-	db := sqlite.NewDB(cfg.Database)
+	db := sqlite.NewDB(cfg)
 	if err := db.Open(); err != nil {
 		tb.Fatal(err)
 	}
