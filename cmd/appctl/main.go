@@ -71,11 +71,29 @@ func Run(ctx context.Context, args []string) error {
 	// Delegate subcommands to their own Run() methods.
 	switch cmd {
 	case "db-setup":
-		if err := dbSetup(cfg); err != nil {
-			return err
+		switch cfg.Env {
+		case app.ENV_DEVELOPMENT:
+			if err := dbSQLiteSetup(cfg); err != nil {
+				return err
+			}
+		default:
+			panic("TODO")
 		}
 
 		return nil
+
+	case "db-drop":
+		switch cfg.Env {
+		case app.ENV_DEVELOPMENT:
+			if err := dbSQLiteDrop(cfg); err != nil {
+				return err
+			}
+		default:
+			panic("TODO")
+		}
+
+		return nil
+
 	case "", "-h", "help":
 		usage()
 		return flag.ErrHelp
@@ -96,5 +114,7 @@ Usage:
 The commands are:
 
 	db-setup	setup the database
+	db-drop		drop the database
+	db-reset	reset the database
 `[1:])
 }

@@ -38,8 +38,8 @@ type DB struct {
 
 	// Datasource name.
 	DSN string
-
-	AppDir string
+	DSNFullPath string
+	IsInMemory bool
 
 	// Returns the current time. Defaults to time.Now().
 	// Can be mocked for tests.
@@ -49,9 +49,24 @@ type DB struct {
 // NewDB returns a new instance of DB associated with the given datasource name.
 // func NewDB(dsn string) *DB {
 func NewDB(cfg app.ConfigType) *DB {
+	mem := ":memory:"
+
+	dsn := cfg.Database.Name
+
+	var dsnFullPath string
+	var isInMemory bool
+	// Make the parent directory unless using an in-memory db.
+	if dsn != mem {
+		const perm = 0700
+		dsnFullPath = filepath.Join(cfg.AppDir, dsn)
+
+		isInMemory = false
+	}
+
 	db := &DB{
-		DSN: cfg.Database.Name,
-		AppDir: cfg.AppDir,
+		DSN: dsn,
+		DSNFullPath: dsnFullPath,
+		IsInMemory: isInMemory,
 		Now: time.Now,
 	}
 	db.ctx, db.cancel = context.WithCancel(context.Background())
@@ -65,18 +80,15 @@ func (db *DB) Open() (err error) {
 		return fmt.Errorf("dsn required")
 	}
 
-	mem := ":memory:"
 	var dsn string
-	// Make the parent directory unless using an in-memory db.
-	if db.DSN != mem {
+	if db.IsInMemory {
+		dsn = db.DSN
+	} else {
+		dsn = db.DSNFullPath
 		const perm = 0700
-		dsn = filepath.Join(db.AppDir, db.DSN)
-
 		if err = os.MkdirAll(filepath.Dir(dsn), perm); err != nil {
 			return
 		}
-	} else {
-		dsn = db.DSN
 	}
 
 	// Connect to the database.
@@ -181,6 +193,30 @@ func (db *DB) Close() error {
 	if db.db != nil {
 		return db.db.Close()
 	}
+	return nil
+}
+
+func (db *DB) Drop() error {
+	// Cancel background context.
+	db.cancel()
+	if err := db.Close(); err != nil {
+		return err
+	}
+
+	if !db.IsInMemory {
+		if _, err := os.Stat(db.DSNFullPath); err != nil {
+			if os.IsNotExist(err) {
+				return nil
+			} else {
+				return err
+			}
+		}
+
+		if err := os.Remove(db.DSNFullPath); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
