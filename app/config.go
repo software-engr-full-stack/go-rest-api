@@ -36,24 +36,25 @@ type ConfigType struct {
 }
 
 const (
-    DEVELOPMENT = "development"
-    TEST        = "test"
-    PRODUCTION  = "production"
+    ENV_VAR         = "GO_ENV"
+    ENV_DEVELOPMENT = "development"
+    ENV_TEST        = "test"
+    ENV_PRODUCTION  = "production"
 )
 
 func NewConfig(configFileName string) (ConfigType, error) {
     var empty ConfigType
 
     var cfg ConfigType
-    env := strings.TrimSpace(os.Getenv("GO_ENV"))
+    env := strings.TrimSpace(os.Getenv(ENV_VAR))
     switch env {
-    case DEVELOPMENT, "":
+    case ENV_DEVELOPMENT, "":
         cfg.IsDevelopment = true
-        cfg.Env = DEVELOPMENT
-    case TEST:
+        cfg.Env = ENV_DEVELOPMENT
+    case ENV_TEST:
         cfg.IsTest = true
         cfg.Env = env
-    case PRODUCTION:
+    case ENV_PRODUCTION:
         cfg.IsProduction = true
         cfg.Env = env
     default:
