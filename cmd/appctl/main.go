@@ -32,7 +32,8 @@ func main() {
 		fmt.Fprintln(os.Stderr, e.Message)
 		os.Exit(1)
 	} else if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 }
 
