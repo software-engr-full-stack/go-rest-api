@@ -1,4 +1,4 @@
-package lib
+package libtest
 
 import (
     "runtime"
@@ -8,10 +8,10 @@ import (
     "go-rest-api/app"
 )
 
-func TestConfig() (app.ConfigType, error){
+func Config() (app.ConfigType, error){
     _, filename, _, _ := runtime.Caller(0) //nolint:golangcilint,dogsled
 
-    configFileFullPath := filepath.Join(filepath.Dir(filename), "..", "secrets", "config.yml")
+    configFileFullPath := filepath.Join(filepath.Dir(filename), "..", "..", "secrets", "config.yml")
 
     var empty app.ConfigType
     err := os.Setenv(app.ENV_VAR, app.ENV_TEST)

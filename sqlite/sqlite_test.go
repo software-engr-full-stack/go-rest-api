@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"go-rest-api/sqlite"
-	"go-rest-api/lib"
+	"go-rest-api/lib/libtest"
 )
 
 // Ensure the test database can open & close.
@@ -17,7 +17,7 @@ func TestDB(t *testing.T) {
 func MustOpenDB(tb testing.TB) *sqlite.DB {
 	tb.Helper()
 
-	cfg, err := lib.TestConfig()
+	cfg, err := libtest.Config()
 	if err != nil {
 		tb.Fatal(err)
 	}
